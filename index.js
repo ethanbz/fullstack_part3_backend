@@ -4,6 +4,7 @@ let {persons} = require('./data')
 const morgan = require('morgan')
 
 app.use(express.json())
+app.use(express.static('build'))
 morgan.token('content', (req, res) => { if (req.body.name) return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'))
 
