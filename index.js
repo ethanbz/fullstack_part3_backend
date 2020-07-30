@@ -59,32 +59,13 @@ app.put('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
     const body = req.body
 
-    if (!body.name || !body.number) {
-        return res.status(400).json({
-            error: 'name and number required'
-        })
-    }
-    let duplicate = false;
-    Person.find({}).then(persons => {
-        persons.forEach(person => {
-            if (person.name === body.name) {
-                duplicate = true;
-            }
-        })
-        if (duplicate) {
-        return res.status(400).json({error: `${body.name} is already in the phonebook`})
-        }   
-    })
-    .catch(error => next(error))
-     
-
     const person = new Person({
         name: body.name,
         number: body.number,
     })
 
     person.save().then(savedPerson => {
-        res.json(savedPerson)
+        res.json(savedPerson.toJSON())
     })
     .catch(error => next(error))
 })
@@ -100,7 +81,9 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformatted id' })
-    } 
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
 
     next(error)
 }

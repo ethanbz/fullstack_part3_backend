@@ -1,17 +1,10 @@
 require('dotenv').config()
 
 const mongoose = require('mongoose')
+const uniqueValidator = require('mongoose-unique-validator')
 mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true);
 
-if ( process.argv.length === 3 ) {
-    console.log('give both name and number as argument')
-    process.exit(1)
-}
-
-
-
-const name = process.argv[3]
-const number = process.argv[4]
 
 const url = process.env.MONGODB_URI
 console.log('connecting to', url)
@@ -24,9 +17,11 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
     })
 
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
+    name: { type: String, unique: true, minlength: 3, required: true },
+    number: { type: String, minlength: 8, required: true }
 })
+
+personSchema.plugin(uniqueValidator)
 
 personSchema.set('toJSON', {
     transform: (document, returnedObject) => {
